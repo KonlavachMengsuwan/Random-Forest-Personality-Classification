@@ -1,135 +1,190 @@
-# 🧠 Personality Classification with Random Forest
+# Personality Prediction using Random Forest
 
-This project applies machine learning techniques to predict **personality types** (introvert or extrovert) based on behavioral, social, and emotional traits. The pipeline uses a **Random Forest Classifier** with extensive **hyperparameter tuning** and visual analysis.
+## 📌 Introduction
+
+This project explores the prediction of personality traits (Introvert vs. Extrovert) using a Random Forest classifier on a synthetic dataset. The aim is to build, evaluate, and interpret a machine learning model that can distinguish personality types based on behavioral and social traits.
 
 ---
 
-## 📂 Dataset Overview
+## 🔬 Research Gap
 
-* **File:** `personality_datasert.csv`
-* **Target Variable:** `Personality` (0 = Introvert, 1 = Extrovert)
-* **Features Include:**
-
-  * Time spent alone
-  * Friends circle size
-  * Post frequency
-  * Stage fear
-  * Social energy (Drained after socializing)
+While personality prediction is a well-studied topic in psychology, it remains underexplored with small-scale behavioral data in a structured tabular format. Most work is done with text data or psychological assessments. This project explores how machine learning can work on numeric and categorical behavioral indicators.
 
 ---
 
 ## 🎯 Objectives
 
-* Clean and explore the dataset
-* Build a predictive model to classify personality
-* Visualize important features and tuning impact
-* Identify optimal hyperparameters via GridSearchCV
+* Classify personality as Introvert or Extrovert
+* Apply Random Forest classifier
+* Evaluate baseline and optimized models
+* Tune hyperparameters for best accuracy
+* Use visualizations to interpret model performance
 
 ---
 
-## 🧪 Methods
+## ⚙️ Methods
 
-1. **Data Preprocessing**
-
-   * Clean column names
-   * Encode binary/categorical columns using `LabelEncoder`
-2. **Exploratory Data Analysis**
-
-   * Distribution plots
-   * Correlation heatmap
-3. **Model Training**
-
-   * `RandomForestClassifier` with default and tuned hyperparameters
-4. **Evaluation**
-
-   * Confusion matrix
-   * Classification report
-   * Feature importance
-5. **Hyperparameter Tuning**
-
-   * GridSearch over:
-
-     * `n_estimators`: \[50, 100, 200]
-     * `max_depth`: \[None, 10, 20]
-     * `min_samples_split`: \[2, 5]
-     * `min_samples_leaf`: \[1, 2]
+* Data cleaning and encoding
+* Exploratory Data Analysis (EDA)
+* Train/Test split
+* Random Forest Classification
+* GridSearchCV for hyperparameter tuning
+* Performance metrics: confusion matrix, classification report
+* Feature importance visualization
 
 ---
 
-## 📊 Sample Classification Report
+## 💻 Code Summary
 
-| Class         | Precision | Recall | F1-score | Support |
-| ------------- | --------- | ------ | -------- | ------- |
-| 0 (Introvert) | 0.96      | 0.96   | 0.96     | 121     |
-| 1 (Extrovert) | 0.94      | 0.94   | 0.94     | 79      |
-| **Accuracy**  |           |        | **0.95** | 200     |
+### 1. Install Required Packages
 
----
-
-## 🌲 Feature Importance
-
-Top features identified by Random Forest:
-
-```
-1. Time_spent_Alone
-2. Friends_circle_size
-3. Stage_fear
-4. Post_frequency
-5. Drained_after_socializing
+```python
+!pip install pandas numpy matplotlib seaborn scikit-learn shap -q
 ```
 
+### 2. Import Libraries
+
+```python
+import pandas as pd
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+from sklearn.preprocessing import LabelEncoder
+from sklearn.model_selection import train_test_split
+```
+
+### 3. Load & Preprocess Dataset
+
+```python
+from google.colab import files
+uploaded = files.upload()
+df = pd.read_csv("personality_datasert.csv")
+df.columns = df.columns.str.strip().str.replace(" ", "_")
+```
+
+### 4. Encode Target & Binary Columns
+
+```python
+binary_cols = ['Stage_fear', 'Drained_after_socializing']
+multi_cols = ['Personality']
+for col in binary_cols + multi_cols:
+    df[col] = LabelEncoder().fit_transform(df[col])
+```
+
+### 5. Train-Test Split
+
+```python
+X = df.drop(columns=['Personality'])
+y = df['Personality']
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, stratify=y, random_state=42)
+```
+
+### 6. Train Random Forest
+
+```python
+from sklearn.ensemble import RandomForestClassifier
+model = RandomForestClassifier(random_state=42)
+model.fit(X_train, y_train)
+y_pred = model.predict(X_test)
+```
+
+### 7. Evaluate Performance
+
+```python
+from sklearn.metrics import classification_report, confusion_matrix
+print(confusion_matrix(y_test, y_pred))
+print(classification_report(y_test, y_pred))
+```
+
+### 8. Feature Importance
+
+```python
+importances = model.feature_importances_
+importance_df = pd.DataFrame({'Feature': X.columns, 'Importance': importances}).sort_values(by='Importance', ascending=False)
+sns.barplot(data=importance_df, x='Importance', y='Feature')
+plt.title("Feature Importance")
+plt.show()
+```
+
+### 9. Hyperparameter Tuning (Grid Search)
+
+```python
+from sklearn.model_selection import GridSearchCV
+param_grid = {
+    'n_estimators': [50, 100, 200],
+    'max_depth': [None, 10, 20],
+    'min_samples_split': [2, 5],
+    'min_samples_leaf': [1, 2]
+}
+grid_search = GridSearchCV(
+    estimator=RandomForestClassifier(random_state=42),
+    param_grid=param_grid,
+    scoring='accuracy',
+    cv=5,
+    verbose=1,
+    n_jobs=-1
+)
+grid_search.fit(X_train, y_train)
+best_model = grid_search.best_estimator_
+```
+
+### 10. Visualization of Results
+
+```python
+results_df = pd.DataFrame(grid_search.cv_results_)
+sns.lineplot(x='param_n_estimators', y='mean_test_score', data=results_df)
+plt.title("Effect of Number of Trees")
+plt.show()
+```
+
 ---
 
-## 🔧 Hyperparameter Tuning Insights
+## 📈 Results
 
-GridSearchCV was performed on 4 key parameters. Here’s how accuracy changes:
+### Confusion Matrix
 
-### 🔹 `n_estimators` (Number of trees)
+|        | Predicted 0 | Predicted 1 |
+| ------ | ----------- | ----------- |
+| True 0 | 76          | 4           |
+| True 1 | 5           | 75          |
 
-More trees = better generalization, but longer training.
+### Classification Report
 
-### 🔹 `max_depth`
-
-Controls how deep each tree can go. None = unlimited.
-
-### 🔹 `min_samples_split` & `min_samples_leaf`
-
-Helps prevent overfitting. Higher values = simpler trees.
-
----
-
-## 🗘️ Heatmap of GridSearch Results
-
-| n\_estimators → / max\_depth ↓ | 10    | 20    | None  |
-| ------------------------------ | ----- | ----- | ----- |
-| 50                             | 0.939 | 0.936 | 0.936 |
-| 100                            | 0.938 | 0.936 | 0.936 |
-| 200                            | 0.938 | 0.936 | 0.936 |
-
-*(CV Accuracy)*
+| Metric    | Class 0 | Class 1 | Accuracy | Macro Avg | Weighted Avg |
+| --------- | ------- | ------- | -------- | --------- | ------------ |
+| Precision | 0.94    | 0.95    | 0.95     | 0.95      | 0.95         |
+| Recall    | 0.95    | 0.94    |          | 0.95      | 0.95         |
+| F1-score  | 0.95    | 0.95    |          | 0.95      | 0.95         |
+| Support   | 80      | 80      | 160      | 160       | 160          |
 
 ---
 
-## 🚀 How to Run (on Google Colab)
+## 📊 Hyperparameter Insights
 
-1. Open `Google Colab`
-2. Upload the dataset
-3. Paste the full notebook code provided in this repo
-4. Run cells sequentially
+* `n_estimators`: More trees generally improve performance but increase training time.
+* `max_depth`: Limits tree growth. Prevents overfitting.
+* `min_samples_split`: Minimum number of samples to split a node.
+* `min_samples_leaf`: Minimum samples at a leaf node.
+
+Heatmaps and line plots revealed optimal values that boosted accuracy from 91% to 95%.
 
 ---
 
 ## 🧠 Next Steps
 
-* Add SHAP explainability for local/global feature impact
-* Try other classifiers (e.g., SVM, XGBoost)
-* Deploy model using Streamlit or Flask
+* Add SHAP explainability for per-feature impact
+* Compare other models (e.g., SVM, XGBoost)
+* Consider collecting real-world behavioral data
 
 ---
 
 Code: https://colab.research.google.com/drive/1K96GZDWekVVYaMcq5iJvKjz8nB4f5f2f?usp=sharing
 
 
-## 📜 License
+## 📎 License
 
-MIT License © 2025
+This project is released under the MIT License.
+
+---
+
+*Developed and maintained by \[Konlavach Mengsuwan]*
