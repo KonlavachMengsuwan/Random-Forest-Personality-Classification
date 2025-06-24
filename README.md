@@ -62,6 +62,11 @@ df = pd.read_csv("personality_datasert.csv")
 df.columns = df.columns.str.strip().str.replace(" ", "_")
 ```
 
+![image](https://github.com/user-attachments/assets/72516bca-e8be-4d76-8120-dd572bb55634)
+![image](https://github.com/user-attachments/assets/acb39ed8-b604-419d-b7d0-5e04d27864b3)
+![image](https://github.com/user-attachments/assets/e310146b-8465-4ab6-b48c-3e4b16ed807e)
+
+
 ### 4. Encode Target & Binary Columns
 
 ```python
@@ -105,6 +110,9 @@ sns.barplot(data=importance_df, x='Importance', y='Feature')
 plt.title("Feature Importance")
 plt.show()
 ```
+![image](https://github.com/user-attachments/assets/1d0428e0-ecf0-421f-82c6-a2db86e07a0e)
+
+
 
 ### 9. Hyperparameter Tuning (Grid Search)
 
@@ -136,6 +144,13 @@ sns.lineplot(x='param_n_estimators', y='mean_test_score', data=results_df)
 plt.title("Effect of Number of Trees")
 plt.show()
 ```
+
+![image](https://github.com/user-attachments/assets/fa397fd5-4988-4ad8-9b5a-893d5d8a5c83)
+![image](https://github.com/user-attachments/assets/d96c679e-3fd3-45c2-86d4-41b4bc567a79)
+![image](https://github.com/user-attachments/assets/c3bfff39-f1e5-4e90-94ec-eadb513d18d3)
+![image](https://github.com/user-attachments/assets/991d7aa0-0150-454b-a6c7-11771bc3d78d)
+
+
 
 ---
 
@@ -169,6 +184,9 @@ plt.show()
 Heatmaps and line plots revealed optimal values that boosted accuracy from 91% to 95%.
 
 ---
+
+![image](https://github.com/user-attachments/assets/fad73b5e-f93d-4047-823a-10810f8c3927)
+![image](https://github.com/user-attachments/assets/af95543c-b3a9-477d-8f1b-3686672279bf)
 
 ## 🧠 Next Steps
 
